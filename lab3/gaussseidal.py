@@ -1,78 +1,51 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-n=int(input("Enter the number of variables: "))
-print("Enter argumented matrix: ")
-x=[]
-A=[]
+
+n = int(input("Enter the number of variables : "))
+A = []
+
+print("Enter the augmented matrix (each row with coefficients and constant term):")
 for i in range(n):
-    x=np.array(list(map(float, input(f"Enter initial value : ").split())))
+    A.append(list(map(float, input(f"Row {i+1}: ").split())))
 
-x=np.array(x)
-print("The initial guess is: \n", np.matrix(x))
-e,N= float(input("ENter tolerable error")), int (input("ENter maximum number of iterations: "))
-itr=1
-tbl=[]
-while itr<=N:
-    x_old=np.copy(x)
+A = np.array(A)
+print(f"\nThe augmented matrix A:\n{A}")
+
+coeff_matrix = A[:, :-1]
+const_terms = A[:, -1]
+
+X = []
+print("\nEnter the initial guess values:")
+for i in range(n):
+    X.append(float(input(f"x{i+1} initial guess: ")))
+
+X = np.array(X)
+print(f"\nInitial guesses:\n{X}")
+
+e = float(input("\nEnter the tolerable error: "))
+N = int(input("Enter the maximum number of iterations: "))
+
+iteration = 0
+itr_table = []
+
+while iteration < N:
+    X_old = X.copy()
+
     for i in range(n):
-        s=0
-        for j in range (n):
-            if j!=i:
-                s+=A[i,i]*x[i]
-                x[i]=(A[i,-1]-s)/A[i,i]
-                tbl.append(x[itr]+x[i] for i in range (n))
-                err=np.abs(x_old-x)
-                if np.all(err<e):
-                    break
-                itr+=1
-        if itr>N:
-            print(f'solution does not converge in {N} iterations')
-        else:
-            print(f'solution converge in {N} iterations\n')
-            print(x)
+        s = sum(coeff_matrix[i][j] * X[j] for j in range(n) if j != i)
+        X[i] = (const_terms[i] - s) / coeff_matrix[i][i]
 
-tbl.pd.Dataframe(tbl,columns=['Iteration'])
+    itr_table.append([iteration + 1] + list(X))
 
-# import numpy as np
+    if np.all(np.abs(X - X_old) < e):
+        break
 
-# n = int(input("Enter the number of variables: "))
-# print("Enter augmented matrix coefficients row by row (including constants):")
+    iteration += 1
 
-# A = []
-# for i in range(n):
-#     row = list(map(float, input(f"Row {i + 1}: ").split()))
-#     A.append(row)
-
-# A = np.array(A)
-# x = np.zeros(n)  
-# e = float(input("Enter tolerable error: "))
-# N = int(input("Enter maximum number of iterations: "))
-
-# print("\nInitial guess:")
-# print(x)
-
-# print("\nIteration process:")
-# for itr in range(1, N + 1):
-#     x_old = x.copy()
-
-#     for i in range(n):
-#         s = 0
-#         for j in range(n):
-#             if j != i:
-#                 s += A[i][j] * x[j] 
-#         x[i] = (A[i][-1] - s) / A[i][i]
-
-#     err = np.abs(x - x_old)
-#     print(f"Iteration {itr}: {x}, Error: {err}")
-
-#     if np.all(err < e):
-#         print(f"\nSolution converged in {itr} iterations.")
-#         break
-# else:
-#     print(f"\nSolution did not converge in {N} iterations.")
-
-# print("\nFinal solution:")
-# for i in range(n):
-#     print(f"x{i+1} = {x[i]:.6f}")
-         
+if iteration == N:
+    print(f"\nSolution not found within {N} iterations.")
+else:
+    print(f"\nSolution found in {iteration+1} iterarion:")
+    print("\nThe solution is :")
+    for i in range(n):
+        print(f"x{i+1} = {X[i]:.4f}")
